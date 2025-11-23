@@ -34,7 +34,7 @@ def extract_query(db_conn_str: str,
 
     return df
 
-# extract_query: load a dataframe into an existing database table
+# load_query: load a dataframe into an existing database table
 # Inputs:
 # db_conn_str: str - pymysql connection string
 # table_name: str - name of table that data is being pushed to in database
