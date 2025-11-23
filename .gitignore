@@ -208,3 +208,6 @@ __marimo__/
 
 # sp_csv folder
 etl/sp_csv/
+
+# Idea folder
+.idea
