@@ -1,12 +1,29 @@
 -- Setup mysql db
-CREATE DATABASE stocks_etl_ml_db;
+CREATE DATABASE tsx_composite_index;
 
-USE stocks_etl_ml_db;
+USE tsx_composite_index;
 
--- Create table used to store S&P tickers
-CREATE TABLE sp_constituents (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-    Actual_Date DATETIME,
-    Load_Date DATETIME,
-    Tickers VARCHAR(50)
+CREATE TABLE tsx_composite_index.company(
+	company_id INT PRIMARY KEY AUTO_INCREMENT,
+    initial_name VARCHAR(255) NOT NULL,
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    date_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE tsx_composite_index.ticker_history(
+	ticker_id INT PRIMARY KEY AUTO_INCREMENT,
+    company_id INT NOT NULL,
+    tsx_ticker VARCHAR(20) NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    yfinance_ticker VARCHAR(20),
+    start_date DATE NOT NULL,
+    end_date DATE DEFAULT NULL,
+    end_reason VARCHAR(1),
+    FOREIGN KEY (company_id) REFERENCES company(company_id)
+);
+
+CREATE TABLE tsx_composite_index.ticker_staging_table(
+    tsx_ticker VARCHAR(20) NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

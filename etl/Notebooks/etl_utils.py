@@ -82,38 +82,14 @@ def load_query(table_name: str,
         except Exception as e:
             print(f"Error creating engine: {e}")
 
-    # Check if table exists
-    insp = inspect(engine)
-    table_exists = insp.has_table(table_name, schema = "dbo")
+    # Append/replace data to/in table
+    try:
+        with engine.begin() as conn:
+            if append:
+                df.to_sql(table_name, conn, if_exists="append", index=False, method = 'multi')
+            else:
+                df.to_sql(table_name, conn, if_exists="replace", index=False, method='multi')
+            print(f"{len(df)} rows uploaded successfully to {table_name}.")
 
-    # Define columns_types
-    column_types = None
-
-    if table_exists:
-        # Get metadata from db table
-        metadata = MetaData()
-        table = Table(table_name, metadata, autoload_with=engine)
-
-        # Ensure column names in dataframe and db table align
-        column_types = {column.name: column.type for column in table.columns if not column.primary_key}
-
-
-    if not table_exists or list(column_types.keys()) == list(df.columns):
-        print("Table columns align: continuing to data upload.")
-
-        # Append data to table
-        try:
-            with engine.begin() as conn:
-                if append:
-                    df.to_sql(table_name, conn, if_exists="append", index=False, dtype=column_types, method = 'multi')
-                else:
-                    df.to_sql(table_name, conn, if_exists="replace", index=False, dtype=column_types, method='multi')
-                print(f"{len(df)} rows uploaded successfully to {table_name}.")
-
-        except DataError as e:
-            print(f"A data error occurred, likely due to a mismatch of data types: {e}")
-
-    else:
-        print("Table column names do not align - ensure alignment before proceeding.")
-        print(f"SQL Table columns: {column_types.keys()}")
-        print(f"Dataframe columns: {df.columns}")
+    except Exception as e:
+        print(f"An Error occurred: {e}")
