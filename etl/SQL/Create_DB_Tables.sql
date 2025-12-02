@@ -21,9 +21,3 @@ CREATE TABLE tsx_composite_index.ticker_history(
     end_reason VARCHAR(1),
     FOREIGN KEY (company_id) REFERENCES company(company_id)
 );
-
-CREATE TABLE tsx_composite_index.ticker_staging_table(
-    tsx_ticker VARCHAR(20) NOT NULL,
-    company_name VARCHAR(255) NOT NULL,
-    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);

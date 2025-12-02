@@ -54,7 +54,8 @@ def extract_query(table_name: Optional[str] = None,
     except Exception as e:
         print(f"Error during connection or execution of query: {e}")
 
-    return df
+    if df is not None:
+        return df
 
 # load_query: load a dataframe into an existing database table, or create table if table does not yet exist
 # Last updated: 2025-11-23
