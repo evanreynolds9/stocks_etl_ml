@@ -1,9 +1,7 @@
 ### ETL Utilities ###
 # Packages:
 import pandas as pd
-import os
-from sqlalchemy import create_engine, MetaData, Table, inspect
-from sqlalchemy.exc import DataError
+from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from typing import Optional, Union, Dict, Sequence, Any
 
