@@ -69,7 +69,7 @@ def extract_query(table_name: Optional[str] = None,
 
 def load_query(table_name: str,
                df: pd.DataFrame,
-               append = bool,
+               append: bool = True,
                db_conn_str: Optional[str] = None,
                engine: Optional[Engine] = None) -> None:
     # Create engine if not passed
