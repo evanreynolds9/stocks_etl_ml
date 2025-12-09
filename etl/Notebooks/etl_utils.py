@@ -7,7 +7,7 @@ from typing import Optional, Union, Dict, Sequence, Any
 
 
 # extract_query: fetch the results of a SQL query at a given file path and return the results in a pandas dataframe
-# Last updated: 2025-11-23
+# Last updated: 2025-12-08
 
 # Inputs:
 # table_name: str - name of table in database. If passed, SELECT * from table will be returned
@@ -24,6 +24,10 @@ def extract_query(table_name: Optional[str] = None,
                 db_conn_str: Optional[str] = None,
                 engine: Optional[Engine] = None,
                 params: Optional[Union[Dict[str, Any], Sequence[Any]]] = None) -> Optional[pd.DataFrame]:
+
+    # Set default for df so it is not referenced before assignemnt
+    df = None
+
     # Confirm that only one of sql_query or table_name were passed
     if (table_name is None) == (sql_query is None):
         raise ValueError("Only one, and exactly one of table_name or sql_query must be supplied."
@@ -52,8 +56,8 @@ def extract_query(table_name: Optional[str] = None,
     except Exception as e:
         print(f"Error during connection or execution of query: {e}")
 
-    if df is not None:
-        return df
+
+    return df
 
 # load_query: load a dataframe into an existing database table, or create table if table does not yet exist
 # Last updated: 2025-11-23
