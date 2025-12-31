@@ -5,9 +5,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from typing import Optional, Union, Dict, Sequence, Any
 
+# Setup logger
+import logging
+logger = logging.getLogger(__name__)
+
 
 # extract_query: fetch the results of a SQL query at a given file path and return the results in a pandas dataframe
-# Last updated: 2025-12-08
+# Last updated: 2025-12-31
 
 # Inputs:
 # table_name: str - name of table in database. If passed, SELECT * from table will be returned
@@ -25,42 +29,45 @@ def extract_query(table_name: Optional[str] = None,
                 engine: Optional[Engine] = None,
                 params: Optional[Union[Dict[str, Any], Sequence[Any]]] = None) -> Optional[pd.DataFrame]:
 
-    # Set default for df so it is not referenced before assignemnt
+    # Set default for df so it is not referenced before assignment
     df = None
 
     # Confirm that only one of sql_query or table_name were passed
     if (table_name is None) == (sql_query is None):
-        raise ValueError("Only one, and exactly one of table_name or sql_query must be supplied."
-                         "Otherwise execution is ambiguous.")
+        msg = "One and only one of table_name or sql_query must be supplied"
+        logger.critical(msg)
+        raise ValueError(msg)
 
     # Create engine if not passed
     if engine is None:
         if db_conn_str is None:
-            raise ValueError("One of engine or db_conn_str must be supplied.")
+            msg = "One of engine or db_conn_str must be supplied."
+            logger.critical(msg)
+            raise ValueError(msg)
+
         try:
             engine = create_engine(db_conn_str)
-        except Exception as e:
-            print(f"Error creating engine: {e}")
+        except Exception:
+            logger.exception(f"Error creating engine.")
 
     try:
         # Run query
         with engine.connect() as conn:
-            print("Connection Successful!")
+            logger.info("DB Connection Successful!")
             if table_name is not None:
                 df = pd.read_sql_table(table_name, con=conn)
-                print(f"{table_name} loaded successfully!")
+                logger.info(f"{table_name} loaded successfully!")
             else:
                 df = pd.read_sql(sql = sql_query, con = conn, params = params)
-                print(f"SQL script executed successfully!")
+                logger.info(f"SQL script executed successfully!")
 
-    except Exception as e:
-        print(f"Error during connection or execution of query: {e}")
-
+    except Exception:
+        logger.exception("Error during connection or execution of query.")
 
     return df
 
 # load_query: load a dataframe into an existing database table, or create table if table does not yet exist
-# Last updated: 2025-11-23
+# Last updated: 2025-12-31
 
 # Inputs:
 # table_name: str - name of table that data is being pushed to in database
@@ -79,11 +86,14 @@ def load_query(table_name: str,
     # Create engine if not passed
     if engine is None:
         if db_conn_str is None:
-            raise ValueError("One of engine or db_conn_str must be supplied.")
+            msg = "One of engine or db_conn_str must be supplied."
+            logger.critical(msg)
+            raise ValueError(msg)
+
         try:
             engine = create_engine(db_conn_str)
-        except Exception as e:
-            print(f"Error creating engine: {e}")
+        except Exception:
+            logger.exception("Error creating engine.")
 
     # Append/replace data to/in table
     try:
@@ -92,7 +102,7 @@ def load_query(table_name: str,
                 df.to_sql(table_name, conn, if_exists="append", index=False, method = 'multi')
             else:
                 df.to_sql(table_name, conn, if_exists="replace", index=False, method='multi')
-            print(f"{len(df)} rows uploaded successfully to {table_name}.")
+            logger.info(f"{len(df)} rows uploaded successfully to {table_name}.")
 
-    except Exception as e:
-        print(f"An Error occurred: {e}")
+    except Exception:
+        logger.exception(f"An error occurred while loading table to the database.")
