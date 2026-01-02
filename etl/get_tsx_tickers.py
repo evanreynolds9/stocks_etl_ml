@@ -29,8 +29,12 @@ logging.basicConfig(
     )
 )
 
-# Setup logger
+# Setup module logger
 logger = logging.getLogger(__name__)
+
+# Setup yfinance logger
+yf_logger = logging.getLogger("yfinance")
+yf_logger.setLevel(logging.WARNING)
 
 # Load chrome driver path
 load_dotenv()
@@ -55,6 +59,8 @@ table_name = "tickers"
 tsx_constituents = {"company_name": [],
                     "company_s": []}
 
+
+logger.info(f"Beginning ETL process to extract TSX Tickers.")
 
 # Configure webdriver
 service = Service(executable_path=chrome_driver_path)
@@ -127,7 +133,7 @@ def get_ticker_info(row):
         info = yf.Ticker(row['ticker']).info
         return info.get('country'), info.get('industry'), info.get('sector'), info.get('financialCurrency')
     except Exception:
-        logger.exception(f"Could not retrieve info for company {row['ticker']}.")
+        logger.exception(f"Error occurred when retrieving info for company {row['ticker']}.")
 
 # Get other company info from yfinance
 df[['country', 'industry', 'sector', 'reporting_currency']] = df.apply(get_ticker_info, axis=1, result_type='expand')
@@ -148,3 +154,4 @@ if len(df[df.isnull().any(axis=1)]) > 0:
 
 # Load table into database
 load_query(table_name=table_name, df=df, append=True, db_conn_str=db_conn_str)
+logger.info(f"Process to extract TSX Tickers complete.")

@@ -1,0 +1,115 @@
+# Pull yfinance price data for listings in the tsx constituent db table
+# Import packages
+import yfinance as yf
+import os
+import pandas as pd
+from dotenv import load_dotenv
+import logging
+
+# Import utilities
+from etl.utils.utils import extract_query, load_query
+
+# Setup global logger
+logging.basicConfig(
+    filename='etl.log', level=logging.INFO,
+    format=(
+        "%(asctime)s  "
+        "%(levelname)-7s  "
+        "%(name)-15s  "
+        "%(funcName)-15s  "
+        "line:%(lineno)-4d\n"
+        "\t%(message)s"
+    )
+)
+
+# Setup module logger
+logger = logging.getLogger(__name__)
+
+# Setup yfinance logger
+yf_logger = logging.getLogger("yfinance")
+yf_logger.setLevel(logging.WARNING)
+
+# Define function to pull price data
+def get_daily_price_data(ticker_list: pd.DataFrame, start_date: str, end_date: str) -> pd.DataFrame:
+    # Create list for batch exports
+    dfs = []
+
+    i = 0
+    size = 50
+    while i < len(ticker_list):
+        _ticker_list = ticker_list['ticker'].iloc[i:i + size].to_list()
+        try:
+            _tickers = yf.Tickers(_ticker_list)
+            df = _tickers.history(start = start_date, end = end_date)
+            df = df.stack(level=1, future_stack=True).reset_index()
+            dfs.append(df)
+        except Exception:
+            logger.exception(f"Error occurred when retrieving price data for this batch of companies: \n "
+                             f"{_ticker_list}")
+        i += size
+
+    logger.info("Price data retrieved successfully.")
+
+    # Combine dfs
+    combined_df = pd.concat(dfs, ignore_index=True)
+
+    return combined_df
+
+# Define function to transform data
+def transform_price_data(df: pd.DataFrame) -> pd.DataFrame:
+    # Rename columns
+    df.columns = df.columns.str.lower().str.replace(" ", "_")
+
+    # Reorder columns
+    df = df[["date", "ticker", "open", "high", "low", "close", "dividends", "stock_splits", "volume"]]
+
+    # Remove nulls and log
+    null_rows = len(df[df.isnull().any(axis=1)])
+
+    if null_rows > 0:
+        logger.warning(
+            f"{null_rows} rows will be dropped due to null values."
+        )
+        df.dropna(inplace=True)
+
+    return df
+
+# Define main function
+def main():
+    logger.info('Starting ETL process for ticker prices.')
+    load_dotenv()
+
+    # Create db connection string
+    db_username = os.getenv("DB_USERNAME")
+    db_password = os.getenv("DB_PASSWORD")
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_name = os.getenv("DB_NAME")
+    db_conn_str = f"mysql+pymysql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
+
+    # Fetch start and end dates from users
+    start_str = input("Enter start date (YYYY-MM-DD): ")
+    end_str = input("Enter end date (YYYY-MM-DD): ")
+
+    # Import current constituent list - get both ticker and id
+    import_query = """
+    SELECT ticker
+    FROM tickers
+    WHERE `active` = 'Y'
+    """
+
+    ticker_list = extract_query(sql_query=import_query, db_conn_str=db_conn_str)
+
+    # Pull price data from yfinance
+    df_raw = get_daily_price_data(ticker_list=ticker_list, start_date=start_str, end_date=end_str)
+
+    # Transform data
+    df_cleaned = transform_price_data(df=df_raw)
+
+    # Load data to database table
+    load_query(table_name="price_history", df=df_cleaned, append=True, db_conn_str=db_conn_str)
+
+    logger.info('Finished ETL process for ticker prices.')
+
+if __name__ == "__main__":
+    main()
