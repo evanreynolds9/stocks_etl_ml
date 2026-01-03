@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import logging
 
 # Import utilities
-from etl.utils.utils import extract_query, load_query
+from etl.src.utils import extract_query, load_query
 
 # Setup global logger
 logging.basicConfig(
@@ -76,7 +76,6 @@ def transform_price_data(df: pd.DataFrame) -> pd.DataFrame:
 
 # Define main function
 def main():
-    logger.info('Starting ETL process for ticker prices.')
     load_dotenv()
 
     # Create db connection string
@@ -90,6 +89,8 @@ def main():
     # Fetch start and end dates from users
     start_str = input("Enter start date (YYYY-MM-DD): ")
     end_str = input("Enter end date (YYYY-MM-DD): ")
+
+    logger.info(f'Starting ETL process for ticker prices between {start_str} and {end_str}.')
 
     # Import current constituent list - get both ticker and id
     import_query = """

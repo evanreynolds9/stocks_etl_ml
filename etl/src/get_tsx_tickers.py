@@ -13,8 +13,8 @@ from dotenv import load_dotenv
 import pandas as pd
 import yfinance as yf
 
-# Import utils
-from utils.utils import load_query
+# Import src
+from etl.src.utils import load_query
 
 # Setup global logger
 logging.basicConfig(
