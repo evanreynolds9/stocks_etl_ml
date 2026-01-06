@@ -6,9 +6,7 @@ from sqlalchemy.engine import Engine
 from typing import Optional, Union, Dict, Sequence, Any
 
 # Setup logger
-import logging
-logger = logging.getLogger(__name__)
-
+from etl.logger_setup import logger
 
 # extract_query: fetch the results of a SQL query at a given file path and return the results in a pandas dataframe
 # Last updated: 2025-12-31

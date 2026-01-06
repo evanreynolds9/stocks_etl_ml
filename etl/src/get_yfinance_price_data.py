@@ -10,24 +10,7 @@ import logging
 from etl.src.utils import extract_query, load_query
 
 # Setup global logger
-logging.basicConfig(
-    filename='etl.log', level=logging.INFO,
-    format=(
-        "%(asctime)s  "
-        "%(levelname)-7s  "
-        "%(name)-15s  "
-        "%(funcName)-15s  "
-        "line:%(lineno)-4d\n"
-        "\t%(message)s"
-    )
-)
-
-# Setup module logger
-logger = logging.getLogger(__name__)
-
-# Setup yfinance logger
-yf_logger = logging.getLogger("yfinance")
-yf_logger.setLevel(logging.WARNING)
+from etl.logger_setup import logger
 
 # Define function to pull price data
 def get_daily_price_data(ticker_list: pd.DataFrame, start_date: str, end_date: str) -> pd.DataFrame:

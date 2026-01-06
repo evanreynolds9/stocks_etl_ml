@@ -17,24 +17,7 @@ import yfinance as yf
 from etl.src.utils import load_query
 
 # Setup global logger
-logging.basicConfig(
-    filename='etl.log', level=logging.INFO,
-    format=(
-        "%(asctime)s  "
-        "%(levelname)-7s  "
-        "%(name)-15s  "
-        "%(funcName)-15s  "
-        "line:%(lineno)-4d\n"
-        "\t%(message)s"
-    )
-)
-
-# Setup module logger
-logger = logging.getLogger(__name__)
-
-# Setup yfinance logger
-yf_logger = logging.getLogger("yfinance")
-yf_logger.setLevel(logging.WARNING)
+from etl.logger_setup import logger
 
 # Load chrome driver path
 load_dotenv()
