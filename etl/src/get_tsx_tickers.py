@@ -1,4 +1,6 @@
 # Import selenium packages
+import sys
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -8,7 +10,6 @@ from selenium.webdriver.support import expected_conditions as EC
 # Import other packages
 from bs4 import BeautifulSoup
 import os
-import logging
 from dotenv import load_dotenv
 import pandas as pd
 import yfinance as yf
@@ -99,7 +100,8 @@ try:
 
 # Catch any exception
 except Exception:
-    logger.exception(f"An unexpected error occurred on page {i}.")
+    logger.exception(f"An unexpected error occurred on page {i}. Halting program execution.")
+    raise
 
 # Put data into a dataframe
 df = pd.DataFrame(tsx_constituents)

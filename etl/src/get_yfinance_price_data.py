@@ -21,14 +21,10 @@ def get_daily_price_data(ticker_list: pd.DataFrame, start_date: str, end_date: s
     size = 50
     while i < len(ticker_list):
         _ticker_list = ticker_list['ticker'].iloc[i:i + size].to_list()
-        try:
-            _tickers = yf.Tickers(_ticker_list)
-            df = _tickers.history(start = start_date, end = end_date)
-            df = df.stack(level=1, future_stack=True).reset_index()
-            dfs.append(df)
-        except Exception:
-            logger.exception(f"Error occurred when retrieving price data for this batch of companies: \n "
-                             f"{_ticker_list}")
+        _tickers = yf.Tickers(_ticker_list)
+        df = _tickers.history(start = start_date, end = end_date)
+        df = df.stack(level=1, future_stack=True).reset_index()
+        dfs.append(df)
         i += size
 
     logger.info("Price data retrieved successfully.")
@@ -50,9 +46,7 @@ def transform_price_data(df: pd.DataFrame) -> pd.DataFrame:
     null_rows = len(df[df.isnull().any(axis=1)])
 
     if null_rows > 0:
-        logger.warning(
-            f"{null_rows} rows will be dropped due to null values."
-        )
+        logger.warning(f"{null_rows} rows will be dropped due to null values.")
         df.dropna(inplace=True)
 
     return df

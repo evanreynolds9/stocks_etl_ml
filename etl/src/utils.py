@@ -47,6 +47,7 @@ def extract_query(table_name: Optional[str] = None,
             engine = create_engine(db_conn_str)
         except Exception:
             logger.exception(f"Error creating engine.")
+            raise
 
     try:
         # Run query
@@ -54,13 +55,14 @@ def extract_query(table_name: Optional[str] = None,
             logger.info("DB Connection Successful!")
             if table_name is not None:
                 df = pd.read_sql_table(table_name, con=conn)
-                logger.info(f"{table_name} loaded successfully!")
+                logger.info(f"{table_name} loaded successfully! {len(df)} rows loaded!")
             else:
                 df = pd.read_sql(sql = sql_query, con = conn, params = params)
-                logger.info(f"SQL script executed successfully!")
+                logger.info(f"SQL script executed successfully! {len(df)} rows loaded!")
 
     except Exception:
         logger.exception("Error during connection or execution of query.")
+        raise
 
     return df
 
@@ -92,6 +94,7 @@ def load_query(table_name: str,
             engine = create_engine(db_conn_str)
         except Exception:
             logger.exception("Error creating engine.")
+            raise
 
     # Append/replace data to/in table
     try:
@@ -104,3 +107,4 @@ def load_query(table_name: str,
 
     except Exception:
         logger.exception(f"An error occurred while loading table to the database.")
+        raise
