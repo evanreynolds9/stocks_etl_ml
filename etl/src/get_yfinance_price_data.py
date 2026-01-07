@@ -4,7 +4,6 @@ import yfinance as yf
 import os
 import pandas as pd
 from dotenv import load_dotenv
-import logging
 
 # Import utilities
 from etl.src.utils import extract_query, load_query
@@ -24,6 +23,7 @@ def get_daily_price_data(ticker_list: pd.DataFrame, start_date: str, end_date: s
         _tickers = yf.Tickers(_ticker_list)
         df = _tickers.history(start = start_date, end = end_date)
         df = df.stack(level=1, future_stack=True).reset_index()
+        df.drop(columns=['Adj Close'], inplace=True, errors='ignore')
         dfs.append(df)
         i += size
 
