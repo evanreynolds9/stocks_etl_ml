@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 # Imports from airflow
 from airflow.sdk import dag, task
-from airflow.hooks.base import BaseHook
+from airflow.hooks.mysql_hook import MySqlHook
 from airflow.operators.python import PythonOperator
 
 # Import functions
@@ -11,7 +11,7 @@ from etl.src.get_yfinance_price_data import get_daily_price_data, transform_pric
 from etl.src.utils import extract_query, load_query
 
 # Setup connection string, default args
-conn = BaseHook.get_connection(conn_id="data_db") # Remember to set this in airflow.config
+conn = MySqlHook.get_connection(conn_id="data_db") # Remember to set this in airflow.config
 db_conn_str = f"{conn.conn_type}://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}"
 
 # Define tasks
