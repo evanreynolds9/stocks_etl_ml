@@ -111,12 +111,10 @@ df["ticker"] = df["company_s"].str.replace(".", "-") + ".TO"
 df["exchange"] = "TSX"
 
 # Define function to pull country, industry, and sector from yfinance
+@logger.catch(reraise=True)
 def get_ticker_info(row):
-    try:
-        info = yf.Ticker(row['ticker']).info
-        return info.get('country'), info.get('industry'), info.get('sector'), info.get('financialCurrency')
-    except Exception:
-        logger.exception(f"Error occurred when retrieving info for company {row['ticker']}.")
+    info = yf.Ticker(row['ticker']).info
+    return info.get('country'), info.get('industry'), info.get('sector'), info.get('financialCurrency')
 
 # Get other company info from yfinance
 df[['country', 'industry', 'sector', 'reporting_currency']] = df.apply(get_ticker_info, axis=1, result_type='expand')

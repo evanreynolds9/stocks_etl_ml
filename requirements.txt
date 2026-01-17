@@ -8,4 +8,5 @@ python-dotenv==1.2.1
 selenium==4.39.0
 SQLAlchemy==2.0.45
 yfinance==1.0
+loguru==0.7.3
 apache-airflow[mysql]

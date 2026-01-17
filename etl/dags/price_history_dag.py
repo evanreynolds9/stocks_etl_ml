@@ -1,18 +1,16 @@
 # Import libraries
 from datetime import datetime, timedelta
+import os
 
 # Imports from airflow
 from airflow.sdk import dag, task
-from airflow.hooks.mysql_hook import MySqlHook
-from airflow.operators.python import PythonOperator
 
 # Import functions
 from etl.src.get_yfinance_price_data import get_daily_price_data, transform_price_data
 from etl.src.utils import extract_query, load_query
 
 # Setup connection string, default args
-conn = MySqlHook.get_connection(conn_id="data_db") # Remember to set this in airflow.config
-db_conn_str = f"{conn.conn_type}://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}"
+db_conn_str = os.getenv('DATA_DB_CONN') # Remember to set this in airflow.config
 
 # Define tasks
 @task(retry_delay=timedelta(hours=3))
@@ -53,8 +51,9 @@ def load():
 
 @dag(
     dag_id="price_history_dag",
-    start_date=datetime(2026, 1, 1),
-    schedule_interval='0 0 * * 1-5',
+    start_date=datetime(2026, 1, 2),
+    schedule='0 21 * * 1-5',
+    catchup=True,
     default_args={'retries': 3},
 )
 def price_history_etl_dag():

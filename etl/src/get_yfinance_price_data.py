@@ -12,6 +12,7 @@ from etl.src.utils import extract_query, load_query
 from etl.logger_setup import logger
 
 # Define function to pull price data
+@logger.catch(reraise=True)
 def get_daily_price_data(ticker_list: pd.DataFrame, start_date: str, end_date: str) -> pd.DataFrame:
     # Create list for batch exports
     dfs = []
@@ -35,6 +36,7 @@ def get_daily_price_data(ticker_list: pd.DataFrame, start_date: str, end_date: s
     return combined_df
 
 # Define function to transform data
+@logger.catch(reraise=True)
 def transform_price_data(df: pd.DataFrame) -> pd.DataFrame:
     # Rename columns
     df.columns = df.columns.str.lower().str.replace(" ", "_")
