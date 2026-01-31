@@ -41,6 +41,13 @@ def transform_price_data(df: pd.DataFrame) -> pd.DataFrame:
     # Rename columns
     df.columns = df.columns.str.lower().str.replace(" ", "_")
 
+    # These columns are sometimes not returned - usually if df is blank. Add them if that is the case
+    if "dividends" not in df.columns:
+        df["dividends"] = 0.0
+
+    if "stock_splits" not in df.columns:
+        df["stock_splits"] = 0.0
+
     # Reorder columns
     df = df[["date", "ticker", "open", "high", "low", "close", "dividends", "stock_splits", "volume"]]
 

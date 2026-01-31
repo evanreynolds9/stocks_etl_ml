@@ -25,7 +25,7 @@ def extract(**kwargs):
 
     run_date = kwargs.get("logical_date")
     # Get data from yfinance
-    df = get_daily_price_data(ticker_list=ticker_list, start_date=run_date, end_date=run_date+timedelta(days=1))
+    df = get_daily_price_data(ticker_list=ticker_list, start_date=run_date-timedelta(days=1), end_date=run_date)
 
     # Load to temp table
     load_query(table_name="raw_price_history", df=df, append=False, db_conn_str=db_conn_str)
@@ -51,7 +51,7 @@ def load():
 
 @dag(
     dag_id="price_history_dag",
-    start_date=datetime(2026, 1, 2),
+    start_date=datetime(2026, 1, 7),
     schedule='0 21 * * 1-5',
     catchup=True,
     default_args={'retries': 3},
