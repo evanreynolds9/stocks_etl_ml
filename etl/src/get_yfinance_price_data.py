@@ -22,7 +22,7 @@ def get_daily_price_data(ticker_list: pd.DataFrame, start_date: str, end_date: s
     while i < len(ticker_list):
         _ticker_list = ticker_list['ticker'].iloc[i:i + size].to_list()
         _tickers = yf.Tickers(_ticker_list)
-        df = _tickers.history(start = start_date, end = end_date)
+        df = _tickers.history(start=start_date, end=end_date, auto_adjust=False)
         df = df.stack(level=1, future_stack=True).reset_index()
         df.drop(columns=['Adj Close'], inplace=True, errors='ignore')
         dfs.append(df)

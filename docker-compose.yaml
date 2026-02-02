@@ -14,7 +14,9 @@ x-airflow-common:
     - ${ENV_FILE_PATH:-.env}
   environment:
     &airflow-common-env
-    AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__PARALLELISM: 1 # Added for debugging
+    AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     DATA_DB_CONN: mysql+pymysql://${DB_USERNAME}:${DB_PASSWORD}@host.docker.internal:${DB_PORT}/${DB_NAME}
@@ -22,6 +24,7 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     PYTHONPATH: /opt/airflow
     AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/etl/dags
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
@@ -32,6 +35,7 @@ x-airflow-common:
     - airflow-logs:/opt/airflow/logs
     - airflow-config:/opt/airflow/config
     - airflow-plugins:/opt/airflow/plugins
+    - airflow-data:/opt/airflow/data
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -198,3 +202,4 @@ volumes:
   airflow-logs:
   airflow-config:
   airflow-plugins:
+  airflow-data:
