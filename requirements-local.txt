@@ -10,3 +10,5 @@ SQLAlchemy==2.0.45
 yfinance==1.0
 loguru==0.7.3
 notebook==7.5.3
+pytest==9.0.2
+pendulum==3.2.0

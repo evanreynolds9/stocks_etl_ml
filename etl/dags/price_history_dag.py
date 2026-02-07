@@ -26,8 +26,11 @@ def extract(**kwargs):
 
     run_date = kwargs.get("logical_date")
     run_date_id = kwargs.get("ts_nodash")
+
+    start_date = run_date.date()
+    end_date = start_date + timedelta(days=1)
     # Get data from yfinance
-    df = get_daily_price_data(ticker_list=ticker_list, start_date=run_date-timedelta(days=1), end_date=run_date)
+    df = get_daily_price_data(ticker_list=ticker_list, start_date=start_date, end_date=end_date)
 
     file_name = f"/opt/airflow/data/extracted_data_{run_date_id}.csv"
     # Write to csv
@@ -72,7 +75,7 @@ def load(**kwargs):
 
 @dag(
     dag_id="price_history_dag",
-    start_date=datetime(2026, 1, 7),
+    start_date=datetime(2026, 2, 1),
     schedule='0 21 * * 1-5',
     catchup=True,
     default_args={'retries': 3},

@@ -15,7 +15,6 @@ x-airflow-common:
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
-    AIRFLOW__CORE__PARALLELISM: 1 # Added for debugging
     AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
