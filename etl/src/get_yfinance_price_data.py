@@ -4,6 +4,7 @@ import yfinance as yf
 import os
 import pandas as pd
 from dotenv import load_dotenv
+from typing import Tuple
 
 # Import utilities
 from etl.src.utils import extract_query, load_query
@@ -40,7 +41,7 @@ def get_daily_price_data(ticker_list: pd.DataFrame, start_date: str, end_date: s
 
 # Define function to transform data
 @logger.catch(reraise=True)
-def transform_price_data(df: pd.DataFrame) -> pd.DataFrame:
+def transform_price_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     # Rename columns
     df.columns = df.columns.str.lower().str.replace(" ", "_")
 
@@ -54,14 +55,15 @@ def transform_price_data(df: pd.DataFrame) -> pd.DataFrame:
     # Reorder columns
     df = df[["date", "ticker", "open", "high", "low", "close", "dividends", "stock_splits", "volume"]]
 
-    # Remove nulls and log
-    null_rows = len(df[df.isnull().any(axis=1)])
+    # Separate nulls and log
+    null_rows = df[df.isnull().any(axis=1)]
 
-    if null_rows > 0:
-        logger.warning(f"{null_rows} rows will be dropped due to null values.")
+    if len(null_rows) > 0:
+        logger.warning(f"{null_rows} rows will be returned separately due to null values.")
         df.dropna(inplace=True)
 
-    return df
+    # Return data as well as data with nulls so that they can be fetched later
+    return df, null_rows
 
 # Define main function
 def main():

@@ -27,8 +27,9 @@ def extract(**kwargs):
     run_date = kwargs.get("logical_date")
     run_date_id = kwargs.get("ts_nodash")
 
-    start_date = run_date.date()
-    end_date = start_date + timedelta(days=1)
+    # Note that logical date is in UTC, so 9pm will be 2am the next day
+    start_date = run_date.date() - timedelta(days=1)
+    end_date = run_date.date()
     # Get data from yfinance
     df = get_daily_price_data(ticker_list=ticker_list, start_date=start_date, end_date=end_date)
 
@@ -38,40 +39,38 @@ def extract(**kwargs):
 
 @task(retry_delay=timedelta(minutes=5))
 def transform(**kwargs):
+    # Import raw flat file
     run_date_id = kwargs.get("ts_nodash")
     import_file_name = f"/opt/airflow/data/extracted_data_{run_date_id}.csv"
+    raw_df = pd.read_csv(import_file_name)
 
-    try:
-        # Load raw data
-        raw_df = pd.read_csv(import_file_name)
+    # Apply transformations
+    df, null_rows = transform_price_data(df=raw_df)
 
-        # Apply transformations
-        df = transform_price_data(df=raw_df)
+    # Load null_rows to database
+    load_query(table_name="price_rows_with_nulls", df=null_rows, db_conn_str=db_conn_str)
 
-        export_file_name = f"/opt/airflow/data/transformed_data_{run_date_id}.csv"
-        # Write to csv
-        df.to_csv(export_file_name, index=False)
+    export_file_name = f"/opt/airflow/data/transformed_data_{run_date_id}.csv"
+    # Write to csv
+    df.to_csv(export_file_name, index=False)
 
-    finally:
-        # Delete raw data csv
-        if os.path.exists(import_file_name):
-            os.remove(import_file_name)
+    # If we have made it here, delete raw data csv if it exists
+    if os.path.exists(import_file_name):
+        os.remove(import_file_name)
 
 @task(retry_delay=timedelta(minutes=5))
 def load(**kwargs):
+    # Import raw flat file
     run_date_id = kwargs.get("ts_nodash")
     import_file_name = f"/opt/airflow/data/transformed_data_{run_date_id}.csv"
 
-    try:
-        # Load raw data
-        transformed_df = pd.read_csv(import_file_name)
+    transformed_df = pd.read_csv(import_file_name)
 
-        # Load to database
-        load_query(table_name="price_history", df=transformed_df, db_conn_str=db_conn_str)
-    finally:
-        # Delete transformed data csv
-        if os.path.exists(import_file_name):
-            os.remove(import_file_name)
+    # Load to database
+    load_query(table_name="price_history", df=transformed_df, db_conn_str=db_conn_str)
+
+    if os.path.exists(import_file_name):
+        os.remove(import_file_name)
 
 @dag(
     dag_id="price_history_dag",

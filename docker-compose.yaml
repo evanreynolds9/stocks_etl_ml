@@ -22,6 +22,7 @@ x-airflow-common:
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     PYTHONPATH: /opt/airflow
+    AIRFLOW__CORE__DEFAULT_TIMEZONE: "America/Toronto"
     AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/etl/dags
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
     # yamllint disable rule:line-length
