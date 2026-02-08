@@ -1,3 +1,12 @@
+# Expose etl package to python path
+import sys
+import os
+
+proj_top_level = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if proj_top_level not in sys.path:
+    sys.path.insert(0, proj_top_level)
+
+
 # Import functions from file
 from etl.src.get_yfinance_price_data import get_daily_price_data, transform_price_data
 import pandas as pd

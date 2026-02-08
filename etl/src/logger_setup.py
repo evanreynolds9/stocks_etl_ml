@@ -9,7 +9,7 @@ dotenv.load_dotenv(dotenv_file)
 
 # Get file path
 BASE_DIR = Path(__file__).resolve().parent
-relative = os.getenv("LOG_FILE_PATH", "etl.log")
+relative = os.getenv("LOG_FILE_PATH", "../etl.log")
 log_file_path = BASE_DIR / relative
 
 # Remove default setup

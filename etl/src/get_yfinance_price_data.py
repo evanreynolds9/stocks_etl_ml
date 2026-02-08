@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from etl.src.utils import extract_query, load_query
 
 # Setup global logger
-from etl.logger_setup import logger
+from etl.src.logger_setup import logger
 
 # Define function to pull price data
 @logger.catch(reraise=True)

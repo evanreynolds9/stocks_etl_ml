@@ -6,7 +6,7 @@ import os
 from airflow.sdk import dag, task
 
 # Import functions
-from etl.logger_setup import logger
+from etl.src.logger_setup import logger
 
 # Setup connection string, default args
 db_conn_str = os.getenv('DATA_DB_CONN') # Remember to set this in airflow.config

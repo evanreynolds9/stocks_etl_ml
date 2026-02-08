@@ -16,7 +16,7 @@ import yfinance as yf
 from etl.src.utils import load_query
 
 # Setup global logger
-from etl.logger_setup import logger
+from etl.src.logger_setup import logger
 
 # Load chrome driver path
 load_dotenv()
